@@ -11,10 +11,11 @@ jobs:
       TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
+      - run: curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 && chmod +x /usr/local/bin/dep
+      - run: dep ensure -vendor-only
+      - run: go build
 
       - setup_remote_docker
-
-      # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
           docker build -t jkgentryc/go-stan:$TAG .
