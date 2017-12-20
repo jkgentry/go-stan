@@ -3,20 +3,22 @@ jobs:
   build:
     docker:
       # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
-      - image: golang:1.9.2-alpine3.7
+      - image: circleci/golang:1.9
 
     working_directory: /go/src/github.com/jkgentry/go-stan
 
     environment:
       TEST_RESULTS: /tmp/test-results
-
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
-      - run: apk update
-      - run: apk add curl git
-      - run: curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 && chmod +x /usr/local/bin/dep
-      - run: dep ensure -vendor-only
-      - run: go build
-      - run: curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 && chmod +x /usr/local/bin/dep
+
+      - setup_remote_docker
+
+      # build and push Docker image
+      - run: |
+          TAG=0.1.$CIRCLE_BUILD_NUM
+          docker build -t jkgentryc/go-stan:$TAG .
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker push jkgentryc/go-stan:$TAG
+
 path: /tmp/test-results
